@@ -83,13 +83,13 @@ export function DropZone({ onLoad }: Props) {
           id="file-input"
           type="file"
           multiple
-          accept=".json,.a205"
+          accept="*"
           className="hidden"
           onChange={onInputChange}
         />
         <div className="text-4xl mb-3">📂</div>
-        <p className="text-lg font-medium text-gray-700">Drop .a205 or .a205.json files here</p>
-        <p className="text-sm text-gray-500 mt-1">or click to browse — supports CBOR binary or JSON</p>
+        <p className="text-lg font-medium text-gray-700">Drop .a205 files here</p>
+        <p className="text-sm text-gray-500 mt-1">or click to browse — accepts CBOR binary (.a205) or JSON (.a205.json)</p>
         {loading && <p className="text-blue-600 mt-3 text-sm">Parsing…</p>}
       </div>
 
