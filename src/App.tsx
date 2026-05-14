@@ -29,15 +29,23 @@ export default function App() {
 
   const handleLoad = useCallback((newFiles: LoadedFile[]) => {
     setError(null)
-    // Allow accumulating files if same RS type, or replace if different
-    const allFiles = files.length > 0 && files[0].rs_type === newFiles[0]?.rs_type
-      ? [...files, ...newFiles]
-      : newFiles
-    const mixErr = validateSameRS(allFiles)
-    if (mixErr) {
-      setError(mixErr)
-      return
+    if (newFiles.length === 0) return
+
+    if (files.length > 0) {
+      const existing = files[0].rs_type
+      const incoming = newFiles.map(f => f.rs_type)
+      const mismatch = incoming.filter(t => t !== existing)
+      if (mismatch.length > 0) {
+        setError(
+          `Cannot add ${[...new Set(mismatch)].join(', ')} files — already viewing ${existing}. Clear first, or drop only ${existing} files.`
+        )
+        return
+      }
     }
+
+    const allFiles = [...files, ...newFiles]
+    const mixErr = validateSameRS(allFiles)
+    if (mixErr) { setError(mixErr); return }
     setFiles(allFiles)
   }, [files])
 
