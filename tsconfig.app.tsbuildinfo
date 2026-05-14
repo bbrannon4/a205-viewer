@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/components/dropzone.tsx","./src/components/metadatacard.tsx","./src/components/performanceplot.tsx","./src/components/summarytable.tsx","./src/lib/parse.ts","./src/lib/rs0001.ts","./src/lib/types.ts","./src/lib/units.ts","./src/views/rs0001view.tsx"],"version":"5.9.3"}
