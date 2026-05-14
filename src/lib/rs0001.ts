@@ -44,7 +44,7 @@ export function sliceLookup(
   rs: RS0001,
   xKey: string,
   yKey: string,
-  pins: Record<string, number>,  // axis_key → pinned value (actual value from grid)
+  pinIndices: Record<string, number>,  // axis_key → pinned index (clamped to each file's own grid)
 ): { x: number[]; y: number[] } {
   const gv = rs.performance.performance_map_cooling.grid_variables
   const lv = rs.performance.performance_map_cooling.lookup_variables
@@ -61,11 +61,20 @@ export function sliceLookup(
   const yMeta = LOOKUP_LABELS[yKey]
   const xMeta = GRID_LABELS[xKey]
 
+  // Resolve pinned index → pinned axis value for each non-x axis in THIS file's grid.
+  // Clamp index to this file's actual array length in case files have different grid sizes.
+  const pinnedAxisValues: (number | undefined)[] = gridKeys.map((key, d) => {
+    if (key === xKey) return undefined
+    const idx = pinIndices[key]
+    if (idx === undefined) return undefined
+    const arr = gridArrays[d]
+    return arr[Math.min(idx, arr.length - 1)]
+  })
+
   const xOut: number[] = []
   const yOut: number[] = []
 
   for (let flatIdx = 0; flatIdx < totalSize; flatIdx++) {
-    // Decompose flat index → per-axis indices
     let remainder = flatIdx
     const axisIndices: number[] = new Array(dims.length)
     for (let d = dims.length - 1; d >= 0; d--) {
@@ -73,12 +82,9 @@ export function sliceLookup(
       remainder = Math.floor(remainder / dims[d])
     }
 
-    // Check all pins match
     let pinMatch = true
     for (let d = 0; d < gridKeys.length; d++) {
-      const key = gridKeys[d]
-      if (key === xKey) continue
-      const pinnedVal = pins[key]
+      const pinnedVal = pinnedAxisValues[d]
       if (pinnedVal !== undefined && gridArrays[d][axisIndices[d]] !== pinnedVal) {
         pinMatch = false
         break
@@ -86,7 +92,8 @@ export function sliceLookup(
     }
     if (!pinMatch) continue
 
-    const rawX = xArr[axisIndices[gridKeys.indexOf(xKey as keyof RS0001GridVariables)]]
+    const xIdx = gridKeys.indexOf(xKey as keyof RS0001GridVariables)
+    const rawX = xArr[axisIndices[xIdx]]
     const rawY = yArrRaw[flatIdx]
     const x = xMeta?.displayFn ? xMeta.displayFn(rawX) : rawX
     const y = yMeta?.displayFn ? yMeta.displayFn(rawY) : rawY
@@ -94,7 +101,6 @@ export function sliceLookup(
     yOut.push(y)
   }
 
-  // Sort by x for clean lines
   const pairs = xOut.map((x, i) => [x, yOut[i]] as [number, number])
   pairs.sort((a, b) => a[0] - b[0])
   return { x: pairs.map(p => p[0]), y: pairs.map(p => p[1]) }

@@ -41,31 +41,21 @@ function RS0001Plot({ files }: { files: LoadedFile[] }) {
     })
   }, [gv])
 
-  const pinnedValues = useMemo(() => {
-    const result: Record<string, number> = {}
-    for (const k of otherKeys) {
-      const arr = gv[k]
-      const idx = pinIndices[k] ?? Math.floor(arr.length / 2)
-      result[k] = arr[Math.min(idx, arr.length - 1)]
-    }
-    return result
-  }, [otherKeys, gv, pinIndices])
-
   const traces = useMemo(() => {
     return files.map((f, i) => {
       const rs = f.data as RS0001
-      const { x, y } = sliceLookup(rs, xKey, yKey, pinnedValues)
+      const { x, y } = sliceLookup(rs, xKey, yKey, pinIndices)
       return {
         x,
         y,
         type: 'scatter' as const,
         mode: 'lines+markers' as const,
-        name: f.filename.replace(/\.a205\.json$|\.a205$/, ''),
+        name: f.filename.replace(/\.a205\.(?:json|cbor)$|\.a205$/, ''),
         line: { color: COLORS[i % COLORS.length], width: 2 },
         marker: { size: 5 },
       }
     })
-  }, [files, xKey, yKey, pinnedValues])
+  }, [files, xKey, yKey, pinIndices])
 
   const xLabel = GRID_LABELS[xKey] ? `${GRID_LABELS[xKey].label} (${GRID_LABELS[xKey].unit})` : xKey
   const yLabel = LOOKUP_LABELS[yKey] ? `${LOOKUP_LABELS[yKey].label} (${LOOKUP_LABELS[yKey].unit})` : yKey
