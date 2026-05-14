@@ -54,8 +54,9 @@ export function sliceLookup(
   const dims = gridArrays.map(a => a.length)
   const totalSize = dims.reduce((a, b) => a * b, 1)
 
-  const xArr = gv[xKey as keyof RS0001GridVariables] as number[]
-  const yArrRaw = lv[yKey as keyof RS0001LookupVariables] as number[]
+  const xArr = gv[xKey as keyof RS0001GridVariables] as number[] | undefined
+  const yArrRaw = lv[yKey as keyof RS0001LookupVariables] as number[] | undefined
+  if (!xArr || !yArrRaw) return { x: [], y: [] }
 
   const yMeta = LOOKUP_LABELS[yKey]
   const xMeta = GRID_LABELS[xKey]

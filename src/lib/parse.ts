@@ -16,15 +16,15 @@ function collectWarnings(rs_type: string, data: AnyRS): string[] {
   const warnings: string[] = []
   if (rs_type === 'RS0001') {
     const rs = data as import('./types').RS0001
-    const ap = rs.performance.performance_map_cooling.grid_variables.ambient_pressure
-    if (isSuspiciousPressure(ap)) {
+    const ap = rs.performance?.performance_map_cooling?.grid_variables?.ambient_pressure
+    if (ap && isSuspiciousPressure(ap)) {
       warnings.push('ambient_pressure values look like kPa (expected Pa ≈ 101325). File may have a unit bug.')
     }
   }
   if (rs_type === 'RS0004') {
     const rs = data as import('./types').RS0004
-    const ap = rs.performance.performance_map_cooling.grid_variables.ambient_pressure
-    if (isSuspiciousPressure(ap)) {
+    const ap = rs.performance?.performance_map_cooling?.grid_variables?.ambient_pressure
+    if (ap && isSuspiciousPressure(ap)) {
       warnings.push('ambient_pressure values look like kPa (expected Pa ≈ 101325). The DX-Constant-Efficiency example has this known bug.')
     }
   }
